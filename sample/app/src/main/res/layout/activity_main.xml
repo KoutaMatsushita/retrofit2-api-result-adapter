@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="dev.mk2481.retrofit2.adapter.apiresult.sample.MainViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/code_wrapper"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:hintAnimationEnabled="true"
+            app:hintEnabled="true"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="StatusCode"
+                android:inputType="number"
+                android:maxLength="3"
+                android:text="@={viewModel.code, default=200}" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/sleep_wrapper"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:hintAnimationEnabled="true"
+            app:hintEnabled="true"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/code_wrapper">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sleep"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Sleep"
+                android:inputType="number"
+                android:text="@={viewModel.sleep, default=0}" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/state"
+            style="@style/TextAppearance.AppCompat.Large"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:textAlignment="center"
+            android:textSize="32sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/get"
+            tools:text="test" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/get"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:onClick="@{() -> viewModel.get()}"
+            android:text="get"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sleep_wrapper" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="@{() -> viewModel.post()}"
+            android:text="post"
+            app:layout_constraintEnd_toStartOf="@id/put"
+            app:layout_constraintStart_toEndOf="@id/get"
+            app:layout_constraintTop_toTopOf="@id/get" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/put"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="@{() -> viewModel.put()}"
+            android:text="put"
+            app:layout_constraintEnd_toStartOf="@id/delete"
+            app:layout_constraintStart_toEndOf="@id/post"
+            app:layout_constraintTop_toTopOf="@id/post" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_weight="1"
+            android:onClick="@{() -> viewModel.delete()}"
+            android:text="delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/put"
+            app:layout_constraintTop_toTopOf="@id/put" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

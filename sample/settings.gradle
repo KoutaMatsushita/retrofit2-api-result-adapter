@@ -1,0 +1,4 @@
+include ':domain'
+include ':repository'
+include ':app'
+rootProject.name = "retrofit2-api-result-adapter-sample"
