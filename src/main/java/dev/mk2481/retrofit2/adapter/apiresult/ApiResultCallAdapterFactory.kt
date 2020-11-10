@@ -1,5 +1,6 @@
 package dev.mk2481.retrofit2.adapter.apiresult
 
+import kotlinx.coroutines.flow.Flow
 import retrofit2.CallAdapter
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -14,24 +15,29 @@ class ApiResultCallAdapterFactory private constructor() : CallAdapter.Factory() 
     }
 
     override fun get(returnType: Type, annotations: Array<Annotation>, retrofit: Retrofit): CallAdapter<*, *>? {
-        if (BaseApiResult::class.java != getRawType(returnType)) {
+        if (Flow::class.java != getRawType(returnType)) {
             return null
         }
         if (returnType !is ParameterizedType) {
             throw IllegalStateException(
-                "Deferred return type must be parameterized as ApiResult<Foo> or ApiResult<out Foo>")
+                "Deferred return type must be parameterized as Flow<ApiResult<Foo>> or Flow<ApiResult<out Foo>>")
         }
         val responseType = getParameterUpperBound(0, returnType)
+        if (responseType !is ParameterizedType) {
+            throw IllegalStateException(
+                "Deferred return type must be parameterized as Flow<ApiResult<Foo>> or Flow<ApiResult<out Foo>>")
+        }
+        val successType = getParameterUpperBound(0, responseType)
 
-        val rawDeferredType = getRawType(responseType)
+        val rawDeferredType = getRawType(successType)
         return if (rawDeferredType == Response::class.java) {
-            if (responseType !is ParameterizedType) {
+            if (successType !is ParameterizedType) {
                 throw IllegalStateException(
                     "Response must be parameterized as Response<Foo> or Response<out Foo>")
             }
-            ResponseCallAdapter<Any>(getParameterUpperBound(0, responseType))
+            ResponseCallAdapter<Any>(getParameterUpperBound(0, successType))
         } else {
-            BodyCallAdapter<Any>(responseType)
+            BodyCallAdapter<Any>(successType)
         }
 
     }

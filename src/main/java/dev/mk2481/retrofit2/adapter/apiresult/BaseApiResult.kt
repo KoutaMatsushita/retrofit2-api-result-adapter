@@ -1,82 +1,49 @@
 package dev.mk2481.retrofit2.adapter.apiresult
 
-class BaseApiResult<SUCCESS, ERROR : Throwable>(
-    defaultState: ApiResultState<SUCCESS, ERROR> = Initialize
-) {
-    val isLoading: Boolean
-        get() = state is InProgress
-
-    private var state: ApiResultState<SUCCESS, ERROR> = defaultState
-
-    /**
-     * 結果を取得します
-     *
-     * @param success 成功時のコールバック
-     * @param failure 失敗時のコールバック
-     */
-    fun fold(
-        success: ((SUCCESS) -> Unit)? = null,
-        failure: ((ERROR) -> Unit)? = null,
-    ) {
-        when (val s = state) {
-            is Success -> success?.invoke(s.result)
-            is Failure -> failure?.invoke(s.error)
+sealed class BaseApiResult<out SUCCESS, out ERROR : Throwable> {
+    fun<R> transformSuccess(func: (SUCCESS) -> R): BaseApiResult<R, ERROR> {
+        return when(this) {
+            Initialize -> Initialize
+            InProgress -> InProgress
+            is Success -> Success(func(this.result))
+            is Failure -> this
         }
     }
 
-    /**
-     * レスポンスを変換します
-     *
-     * @param R 変換後のレスポンスクラス
-     * @param func 変換関数
-     * @return 変換後の [BaseApiResult]
-     */
-    fun <R> transformSuccess(func: (SUCCESS) -> R): BaseApiResult<R, ERROR> {
-        return when (val s = state) {
-            Initialize -> BaseApiResult(Initialize)
-            InProgress -> BaseApiResult(InProgress)
-            is Success -> BaseApiResult(Success(func(s.result)))
-            is Failure -> BaseApiResult(s)
+    fun<R: Throwable> transformFailure(func: (ERROR) -> R): BaseApiResult<SUCCESS, R> {
+        return when(this) {
+            Initialize -> Initialize
+            InProgress -> InProgress
+            is Success -> this
+            is Failure -> Failure(func(this.error))
         }
     }
 
-    /**
-     * エラーを変換します
-     *
-     * @param R 変換後のエラークラス
-     * @param func 変換関数
-     * @return 変換後の [BaseApiResult]
-     */
-    fun <R: Throwable> transformFailure(func: (ERROR) -> R): BaseApiResult<SUCCESS, R> {
-        return when (val s = state) {
-            Initialize -> BaseApiResult(Initialize)
-            InProgress -> BaseApiResult(InProgress)
-            is Success -> BaseApiResult((s))
-            is Failure -> BaseApiResult(Failure(func(s.error)))
-        }
+    override fun toString(): String {
+        return "BaseApiResult()"
     }
 
-    internal fun toInitialize() {
-        state = Initialize
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BaseApiResult<*, *>) return false
+        return javaClass == other.javaClass
     }
 
-    internal fun toInProgress() {
-        state = InProgress
-    }
-
-    internal fun toSuccess(response: SUCCESS) {
-        state = Success(response)
-    }
-
-    internal fun toFailure(error: ERROR) {
-        state = Failure(error)
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
     }
 }
+object Initialize : BaseApiResult<Nothing, Nothing>() {
+    override fun toString(): String {
+        return "Initialize()"
+    }
+}
+object InProgress : BaseApiResult<Nothing, Nothing>() {
+    override fun toString(): String {
+        return "InProgress()"
+    }
+}
+data class Success<SUCCESS>(val result: SUCCESS) : BaseApiResult<SUCCESS, Nothing>()
+data class Failure<ERROR : Throwable>(val error: ERROR) : BaseApiResult<Nothing, ERROR>()
 
 typealias ApiResult<SUCCESS> = BaseApiResult<SUCCESS, Throwable>
-
-sealed class ApiResultState<out SUCCESS, out ERROR : Throwable>
-object Initialize : ApiResultState<Nothing, Nothing>()
-object InProgress : ApiResultState<Nothing, Nothing>()
-data class Success<SUCCESS>(val result: SUCCESS) : ApiResultState<SUCCESS, Nothing>()
-data class Failure<ERROR : Throwable>(val error: ERROR) : ApiResultState<Nothing, ERROR>()
